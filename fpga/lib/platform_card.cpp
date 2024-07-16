@@ -157,23 +157,6 @@ PlatformCardFactory::make(json_t *json_card, std::string card_name,
                           const std::filesystem::path &searchPath) {
   auto logger = villas::logging.get("PlatformCardFactory");
 
-  json_t *json_ips = nullptr;
-  json_t *json_paths = nullptr;
-  const char *pci_slot = nullptr;
-  const char *pci_id = nullptr;
-  int do_reset = 0;
-  int affinity = 0;
-  int polling = 0;
-
-  json_error_t err;
-  int ret = json_unpack_ex(
-      json_card, &err, 0, "{ s: o, s?: i, s?: b, s?: s, s?: s, s?: b, s?: o }",
-      "ips", &json_ips, "affinity", &affinity, "do_reset", &do_reset, "slot",
-      &pci_slot, "id", &pci_id, "polling", &polling, "paths", &json_paths);
-
-  if (ret != 0)
-    throw ConfigError(json_card, err, "", "Failed to parse card");
-
   CardParser parser(json_card);
 
   auto card = std::make_shared<fpga::PlatformCard>(vc, parser.device_names);
@@ -181,6 +164,10 @@ PlatformCardFactory::make(json_t *json_card, std::string card_name,
   card->affinity = parser.affinity;
   card->doReset = parser.do_reset != 0;
   card->polling = (parser.polling != 0);
+
+  json_t *json_ips = parser.json_ips;
+  json_t *json_paths = parser.json_paths;
+  json_error_t err;
 
   // Load IPs from a separate json file
   if (!json_is_string(json_ips)) {
@@ -226,6 +213,7 @@ PlatformCardFactory::make(json_t *json_card, std::string card_name,
       const char *from, *to;
       int reverse = 0;
 
+      int ret;
       ret = json_unpack_ex(json_path, &err, 0, "{ s: s, s: s, s?: b }", "from",
                            &from, "to", &to, "reverse", &reverse);
       if (ret != 0)
