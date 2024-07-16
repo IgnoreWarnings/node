@@ -31,6 +31,7 @@ public:
   bool mapMemoryBlock(const std::shared_ptr<MemoryBlock> block) override;
 
 private:
+  void connect(std::string device_name, std::shared_ptr<ip::Core> ip);
 };
 
 } /* namespace fpga */

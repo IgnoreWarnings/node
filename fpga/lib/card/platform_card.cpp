@@ -74,45 +74,34 @@ void PlatformCard::connectVFIOtoIps(
     std::getline(iss, device_addr, '.');
     std::getline(iss, device_name, '.');
 
-    logger->warn("#####DEVICE Name: {} Addr: {}", device_name, device_addr);
-
     size_t addr;
     std::stringstream ss;
     ss << std::hex << device_addr;
     ss >> addr;
 
-    logger->warn("Testing: {0:x}", addr);
-
     for (auto ip : configuredIps) {
-      logger->warn("with: {}  |  {}", ip->base_addr, ip->getInstanceName());
-      if (ip->base_addr == addr) {
-        logger->warn("HEUREKA: {}  |  {}", device_name, ip->getInstanceName());
+      if (ip->getBaseaddr() == addr) {
+        connect(device->getName(), ip);
       }
     }
   }
 
-  // TODO: Connect based on memory addr
-  const size_t ip_mem_size = 65536;
-  for (auto device : devices) {
-    std::string addr;
-    std::string name;
+}
 
-    std::istringstream iss(device->getName());
-    std::getline(iss, addr, '.');
-    std::getline(iss, name, '.');
+void PlatformCard::connect(std::string device_name, std::shared_ptr<ip::Core> ip){
+    auto &mm = MemoryManager::get();
+    const size_t ip_mem_size = 65536;
 
-    size_t srcVertexId = mm.getOrCreateAddressSpace(device->getName());
+    size_t srcVertexId = mm.getOrCreateAddressSpace(device_name);
+
+    std::string taget_address_space_name = ip->getInstanceName() + "/Reg"; //? Reg neded?
     size_t targetVertexId;
-
-    if (name == "dma")
-      targetVertexId = mm.getOrCreateAddressSpace("axi_dma_0/Reg");
-    else if (name == "axis_switch")
-      targetVertexId =
-          mm.getOrCreateAddressSpace("axis_interconnect_0_xbar/Reg");
-
+    targetVertexId = mm.getOrCreateAddressSpace(taget_address_space_name);
+  
     mm.createMapping(0, 0, ip_mem_size, "vfio to ip", srcVertexId,
                      targetVertexId);
-  }
+    
+    logger->debug("Connect {} and {}", mm.getGraph().getVertex(srcVertexId)->name,  mm.getGraph().getVertex(targetVertexId)->name);
 }
 
 bool PlatformCard::mapMemoryBlock(const std::shared_ptr<MemoryBlock> block) {
