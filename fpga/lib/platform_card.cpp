@@ -15,7 +15,7 @@
 #include <filesystem>
 #include <jansson.h>
 #include <string>
-#include <villas/fpga/card/card_parser.hpp>
+#include <villas/fpga/card_parser.hpp>
 #include <villas/fpga/core.hpp>
 #include <villas/fpga/node.hpp>
 #include <villas/fpga/platform_card.hpp>
