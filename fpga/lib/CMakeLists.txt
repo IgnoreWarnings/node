@@ -9,7 +9,6 @@ set(SOURCES
     card.cpp
     pcie_card.cpp
     card/platform_card.cpp
-    card/platform_card_factory.cpp
     core.cpp
     node.cpp
     utils.cpp

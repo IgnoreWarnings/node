@@ -34,5 +34,13 @@ private:
   void connect(std::string device_name, std::shared_ptr<ip::Core> ip);
 };
 
+class PlatformCardFactory {
+public:
+  static std::shared_ptr<PlatformCard>
+  make(json_t *json_card, std::string card_name,
+       std::shared_ptr<kernel::vfio::Container> vc,
+       const std::filesystem::path &searchPath);
+};
+
 } /* namespace fpga */
 } /* namespace villas */

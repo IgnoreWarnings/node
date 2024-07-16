@@ -21,7 +21,7 @@
 #include <villas/utils.hpp>
 
 #include <villas/fpga/card.hpp>
-#include <villas/fpga/card/platform_card_factory.hpp>
+#include <villas/fpga/card/platform_card.hpp>
 #include <villas/fpga/core.hpp>
 #include <villas/fpga/ips/aurora_xilinx.hpp>
 #include <villas/fpga/ips/dino.hpp>
