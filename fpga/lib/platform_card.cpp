@@ -16,9 +16,9 @@
 #include <jansson.h>
 #include <string>
 #include <villas/fpga/card/card_parser.hpp>
-#include <villas/fpga/card/platform_card.hpp>
 #include <villas/fpga/core.hpp>
 #include <villas/fpga/node.hpp>
+#include <villas/fpga/platform_card.hpp>
 
 using namespace villas;
 using namespace villas::fpga;

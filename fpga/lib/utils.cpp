@@ -21,13 +21,13 @@
 #include <villas/utils.hpp>
 
 #include <villas/fpga/card.hpp>
-#include <villas/fpga/card/platform_card.hpp>
 #include <villas/fpga/core.hpp>
 #include <villas/fpga/ips/aurora_xilinx.hpp>
 #include <villas/fpga/ips/dino.hpp>
 #include <villas/fpga/ips/dma.hpp>
 #include <villas/fpga/ips/rtds.hpp>
 #include <villas/fpga/ips/switch.hpp>
+#include <villas/fpga/platform_card.hpp>
 #include <villas/fpga/utils.hpp>
 #include <villas/fpga/vlnv.hpp>
 
