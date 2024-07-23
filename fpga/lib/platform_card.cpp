@@ -24,70 +24,75 @@ using namespace villas;
 using namespace villas::fpga;
 using namespace villas::kernel;
 
+#include <dirent.h>
+#include <sys/types.h>
+
+std::vector<std::string> read_directory(const std::string &name) {
+  DIR *directory = opendir(name.c_str());
+
+  struct dirent *dp;
+  std::vector<std::string> names;
+  dp = readdir(directory);
+  while (dp != NULL) {
+    names.push_back(dp->d_name);
+    dp = readdir(directory);
+  }
+  closedir(directory);
+
+  return names;
+}
+
 PlatformCard::PlatformCard(
-    std::shared_ptr<kernel::vfio::Container> vfioContainer,
-    std::vector<std::string> device_names) {
+    std::shared_ptr<kernel::vfio::Container> vfioContainer) {
   this->vfioContainer = vfioContainer;
   this->logger = villas::logging.get("PlatformCard");
-
-  // Create VFIO Group
-  const int IOMMU_GROUP = 2; //TODO: find Group
-  auto group = std::make_shared<kernel::vfio::Group>(IOMMU_GROUP, true);
-  vfioContainer->attachGroup(group);
-
-  // Open VFIO Devices
-  for (std::string device_name : device_names) {
-    auto vfioDevice = std::make_shared<kernel::vfio::Device>(
-        device_name, group->getFileDescriptor());
-    group->attachDevice(vfioDevice);
-    this->devices.push_back(vfioDevice);
-  }
-
-  // Map all vfio devices in card to process
-  std::map<std::shared_ptr<villas::kernel::vfio::Device>, const void *>
-      mapped_memory;
-  for (auto device : devices) {
-    const void *mapping = device->regionMap(0);
-    if (mapping == MAP_FAILED) {
-      logger->error("Failed to mmap() device");
-    }
-    logger->debug("memory mapped: {}", device->getName());
-    mapped_memory.insert({device, mapping});
-  }
-
-  // Create mappings from process space to vfio devices
-  auto &mm = MemoryManager::get();
-  size_t srcVertexId = mm.getProcessAddressSpace();
-  for (auto pair : mapped_memory) {
-    const size_t mem_size = pair.first->regionGetSize(0);
-    size_t targetVertexId = mm.getOrCreateAddressSpace(pair.first->getName());
-    mm.createMapping(reinterpret_cast<uintptr_t>(pair.second), 0, mem_size,
-                     "process to vfio", srcVertexId, targetVertexId);
-    logger->debug("create edge from process to {}", pair.first->getName());
-  }
 }
 
 void PlatformCard::connectVFIOtoIps(
     std::list<std::shared_ptr<ip::Core>> configuredIps) {
-  auto &mm = MemoryManager::get();
-  auto graph = mm.getGraph();
+  // Create VFIO Group
+  const int IOMMU_GROUP = 2; //TODO: find Group
+  auto group = std::make_shared<kernel::vfio::Group>(IOMMU_GROUP, true);
 
-  for (auto device : devices) {
-    std::string device_addr;
-    std::string device_name;
+  // Attach container to group
+  vfioContainer->attachGroup(group);
 
-    std::istringstream iss(device->getName());
-    std::getline(iss, device_addr, '.');
-    std::getline(iss, device_name, '.');
-
-    size_t addr;
-    std::stringstream ss;
-    ss << std::hex << device_addr;
-    ss >> addr;
+  std::vector<std::string> devicetree_names =
+      read_directory("/sys/bus/platform/devices");
+  for (auto devicetree_name : devicetree_names) {
+    auto parser = DeviceParser(devicetree_name);
+    if (parser.addr == 0)
+      continue;
 
     for (auto ip : configuredIps) {
-      if (ip->getBaseaddr() == addr) {
-        connect(device->getName(), ip);
+      if (ip->getBaseaddr() == parser.addr) {
+        //Device device = Device(parser.name, parser.addr);
+
+        // Open VFIO Device
+        auto vfio_device = std::make_shared<kernel::vfio::Device>(
+            devicetree_name, group->getFileDescriptor());
+        group->attachDevice(vfio_device);
+        this->vfio_devices.push_back(vfio_device);
+
+        // Map vfio device to process
+        const void *mapping = vfio_device->regionMap(0);
+        if (mapping == MAP_FAILED) {
+          logger->error("Failed to mmap() device");
+        }
+        logger->debug("memory mapped: {}", vfio_device->getName());
+
+        // Create mappings from process space to vfio devices
+        auto &mm = MemoryManager::get();
+        size_t srcVertexId = mm.getProcessAddressSpace();
+        const size_t mem_size = vfio_device->regionGetSize(0);
+        size_t targetVertexId =
+            mm.getOrCreateAddressSpace(vfio_device->getName());
+        mm.createMapping(reinterpret_cast<uintptr_t>(mapping), 0, mem_size,
+                         "process to vfio", srcVertexId, targetVertexId);
+        logger->debug("create edge from process to {}", vfio_device->getName());
+
+        // Connect vfio vertex to Reg vertex
+        connect(vfio_device->getName(), ip);
       }
     }
   }
@@ -159,7 +164,7 @@ PlatformCardFactory::make(json_t *json_card, std::string card_name,
 
   CardParser parser(json_card);
 
-  auto card = std::make_shared<fpga::PlatformCard>(vc, parser.device_names);
+  auto card = std::make_shared<fpga::PlatformCard>(vc);
   card->name = std::string(card_name);
   card->affinity = parser.affinity;
   card->doReset = parser.do_reset != 0;

@@ -12,20 +12,61 @@
 
 #pragma once
 
+#include <regex>
 #include <vector>
 #include <villas/fpga/card.hpp>
 
 namespace villas {
 namespace fpga {
 
+class DeviceParser {
+public:
+  std::string name;
+  std::size_t addr;
+
+  DeviceParser(std::string device_name) {
+    // test format of device_name: [adress in hex].[name]
+    if (!std::regex_match(device_name,
+                          std::regex(R"(([a-zA-Z0-9]+\.[a-zA-Z0-9]+))"))) {
+      this->name = "";
+      this->addr = 0;
+      return;
+    }
+
+    std::istringstream iss(device_name);
+
+    // parse address
+    std::string device_addr;
+    std::getline(iss, device_addr, '.');
+
+    // convert from hex to dec
+    std::stringstream ss;
+    ss << std::hex << device_addr;
+
+    // store addr in attribute
+    ss >> this->addr;
+
+    // store name in attribute
+    std::getline(iss, this->name, '.');
+  }
+};
+
+class Device {
+public:
+  const std::string name;
+  const std::size_t addr;
+
+public:
+  Device(std::string name, std::size_t addr) : name(name), addr(addr){};
+};
+
 class PlatformCard : public Card {
 public:
-  PlatformCard(std::shared_ptr<kernel::vfio::Container> vfioContainer,
-               std::vector<std::string> device_names);
+  PlatformCard(std::shared_ptr<kernel::vfio::Container> vfioContainer);
 
   ~PlatformCard(){};
 
-  std::vector<std::shared_ptr<kernel::vfio::Device>> devices;
+  std::vector<std::shared_ptr<kernel::vfio::Device>> vfio_devices;
 
   void connectVFIOtoIps(std::list<std::shared_ptr<ip::Core>> configuredIps);
   bool mapMemoryBlock(const std::shared_ptr<MemoryBlock> block) override;
