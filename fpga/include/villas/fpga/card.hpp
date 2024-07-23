@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include <set>
-
 #include <villas/fpga/core.hpp>
 #include <villas/kernel/vfio_container.hpp>
 
