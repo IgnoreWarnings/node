@@ -61,13 +61,9 @@ void PlatformCard::connectVFIOtoIps(
       read_directory("/sys/bus/platform/devices");
   for (auto devicetree_name : devicetree_names) {
     auto parser = DeviceParser(devicetree_name);
+
     if (parser.addr == 0)
       continue;
-
-    if (devicetree_name == "a0010000.axis_switch") {
-      volatile int dbg = 1;
-      std::cout << dbg;
-    }
 
     for (auto ip : configuredIps) {
       if (ip->getBaseaddr() == parser.addr) {
