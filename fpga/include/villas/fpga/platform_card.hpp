@@ -26,8 +26,7 @@ public:
 
   DeviceParser(std::string device_name) {
     // test format of device_name: [adress in hex].[name]
-    if (!std::regex_match(device_name,
-                          std::regex(R"(([a-zA-Z0-9]+\.[a-zA-Z0-9]+))"))) {
+    if (!std::regex_match(device_name, std::regex("\\w+\\.\\w+"))) {
       this->name = "";
       this->addr = 0;
       return;
