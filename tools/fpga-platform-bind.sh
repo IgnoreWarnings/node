@@ -15,11 +15,13 @@ do
     echo "Device - $device";
 
     # Unbind Device from driver
-    echo "$device > /sys/bus/platform/drivers/xilinx-vdma/unbind";
+    # driver -> path
+    # echo $device > bus/platform/drivers/vfio-platform/unbind
+    echo $device > /sys/bus/platform/drivers/xilinx-vdma/unbind;
 
     # Bind device
-    echo "vfio-platform > /sys/bus/platform/devices/$device/driver_override";
-    echo "$device > /sys/bus/platform/drivers/vfio-platform/bind";
+    echo vfio-platform > /sys/bus/platform/devices/$device/driver_override;
+    echo $device > /sys/bus/platform/drivers/vfio-platform/bind;
 
     i=$((i + 1));
 done
