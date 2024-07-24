@@ -17,30 +17,14 @@
 #include <string>
 #include <villas/fpga/card_parser.hpp>
 #include <villas/fpga/core.hpp>
+#include "villas/kernel/kernel.hpp"
+#include <villas/fpga/device_tree_reader.hpp>
 #include <villas/fpga/node.hpp>
 #include <villas/fpga/platform_card.hpp>
 
 using namespace villas;
 using namespace villas::fpga;
 using namespace villas::kernel;
-
-#include <dirent.h>
-#include <sys/types.h>
-
-std::vector<std::string> read_directory(const std::string &name) {
-  DIR *directory = opendir(name.c_str());
-
-  struct dirent *dp;
-  std::vector<std::string> names;
-  dp = readdir(directory);
-  while (dp != NULL) {
-    names.push_back(dp->d_name);
-    dp = readdir(directory);
-  }
-  closedir(directory);
-
-  return names;
-}
 
 PlatformCard::PlatformCard(
     std::shared_ptr<kernel::vfio::Container> vfioContainer) {
@@ -57,21 +41,18 @@ void PlatformCard::connectVFIOtoIps(
   // Attach container to group
   vfioContainer->attachGroup(group);
 
-  std::vector<std::string> devicetree_names =
-      read_directory("/sys/bus/platform/devices");
-  for (auto devicetree_name : devicetree_names) {
-    auto parser = DeviceParser(devicetree_name);
+  auto dtr = DeviceTreeReader(DeviceTreeReader::PLATFORM_PATH);
+  std::vector<Device> devices = dtr.devices;
 
-    if (parser.addr == 0)
-      continue;
-
+  for (auto device : devices) {
     for (auto ip : configuredIps) {
-      if (ip->getBaseaddr() == parser.addr) {
+      if (ip->getBaseaddr() == device.addr) {
         //Device device = Device(parser.name, parser.addr);
 
+        auto u = device.devicetree_name();
         // Open VFIO Device
         auto vfio_device = std::make_shared<kernel::vfio::Device>(
-            devicetree_name, group->getFileDescriptor());
+            device.devicetree_name(), group->getFileDescriptor());
         group->attachDevice(vfio_device);
         this->vfio_devices.push_back(vfio_device);
 

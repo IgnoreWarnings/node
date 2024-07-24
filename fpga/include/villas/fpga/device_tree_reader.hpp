@@ -21,7 +21,16 @@ public:
 
 public:
   Device(std::string name, std::size_t addr) : name(name), addr(addr){};
-  std::string devicetree_name() { return addr + "." + name; };
+  std::string devicetree_name() {
+    // convert from dec to hex
+    std::stringstream ss;
+    ss << std::hex << addr;
+
+    std::string hex_str;
+    ss >> hex_str;
+
+    return hex_str + "." + name;
+  };
 };
 
 std::vector<std::string> read_names_in_directory(const std::string &name) {
