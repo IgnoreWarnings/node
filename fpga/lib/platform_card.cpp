@@ -47,9 +47,6 @@ void PlatformCard::connectVFIOtoIps(
   for (auto device : devices) {
     for (auto ip : configuredIps) {
       if (ip->getBaseaddr() == device.addr) {
-        //Device device = Device(parser.name, parser.addr);
-
-        auto u = device.devicetree_name();
         // Open VFIO Device
         auto vfio_device = std::make_shared<kernel::vfio::Device>(
             device.devicetree_name(), group->getFileDescriptor());
