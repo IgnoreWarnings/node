@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "villas/kernel/kernel.hpp"
 #include "villas/memory_manager.hpp"
 #include <cstddef>
 #include <filesystem>
@@ -17,8 +18,7 @@
 #include <string>
 #include <villas/fpga/card_parser.hpp>
 #include <villas/fpga/core.hpp>
-#include "villas/kernel/kernel.hpp"
-#include <villas/fpga/device_tree_reader.hpp>
+#include <villas/fpga/devices/ip_device_reader.hpp>
 #include <villas/fpga/node.hpp>
 #include <villas/fpga/platform_card.hpp>
 
@@ -41,12 +41,12 @@ void PlatformCard::connectVFIOtoIps(
   // Attach container to group
   vfioContainer->attachGroup(group);
 
-  auto dtr = DeviceTreeReader(DeviceTreeReader::PLATFORM_PATH);
-  std::vector<Device> devices = dtr.devices;
-
-  for (auto device : devices) {
+  auto dtr = IpDeviceReader(IpDeviceReader::PLATFORM_DEVICES_DIRECTORY);
+  for (auto device : dtr.devices) {
     for (auto ip : configuredIps) {
-      if (ip->getBaseaddr() == device.addr) {
+      if (ip->getBaseaddr() == device.addr()) {
+        //DeviceManager.platformbind(device);
+
         // Open VFIO Device
         auto vfio_device = std::make_shared<kernel::vfio::Device>(
             device.devicetree_name(), group->getFileDescriptor());
