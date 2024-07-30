@@ -25,7 +25,7 @@ public:
     return path.u8string().substr(pos + 1);
   }
 
-  std::optional<Driver> driver() {
+  std::optional<Driver> driver() const {
     std::filesystem::path driver_symlink =
         std::filesystem::path(this->path.u8string() + "/driver");
 
