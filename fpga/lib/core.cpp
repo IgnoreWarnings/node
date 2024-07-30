@@ -184,7 +184,7 @@ CoreFactory::configureIps(std::list<IpIdentifier> orderedIps, json_t *json_ips,
         logger->debug("IRQ: {} -> {}:{}", irqName, irqControllerName, num);
         ip->irqs[irqName] = {num, intc, ""};
       }
-    } 
+    }
 
     json_t *json_memory_view = json_object_get(json_ip, "memory-view");
     if (json_is_object(json_memory_view)) {
