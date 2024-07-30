@@ -49,12 +49,12 @@ public:
   }
 
   std::string name() const {
-    size_t pos = path.u8string().find('.');
+    size_t pos = devicetree_name().find('.');
     return devicetree_name().substr(pos + 1);
   }
 
   size_t addr() const {
-    size_t pos = path.u8string().find('.');
+    size_t pos = devicetree_name().find('.');
     std::string addr_hex = devicetree_name().substr(0, pos);
 
     // convert from hex string to number
