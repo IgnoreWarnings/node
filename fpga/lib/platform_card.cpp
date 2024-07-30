@@ -10,17 +10,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "villas/kernel/kernel.hpp"
-#include "villas/memory_manager.hpp"
 #include <cstddef>
 #include <filesystem>
 #include <jansson.h>
 #include <string>
+#include <utility>
 #include <villas/fpga/card_parser.hpp>
 #include <villas/fpga/core.hpp>
+#include <villas/fpga/devices/device_ip_matcher.hpp>
 #include <villas/fpga/devices/ip_device_reader.hpp>
 #include <villas/fpga/node.hpp>
 #include <villas/fpga/platform_card.hpp>
+#include <villas/kernel/kernel.hpp>
+#include <villas/memory_manager.hpp>
 
 using namespace villas;
 using namespace villas::fpga;
@@ -34,46 +36,65 @@ PlatformCard::PlatformCard(
 
 void PlatformCard::connectVFIOtoIps(
     std::list<std::shared_ptr<ip::Core>> configuredIps) {
-  // Create VFIO Group
-  const int IOMMU_GROUP = 2; //TODO: find Group
+
+  // Read devices from Devicetree
+  auto dtr = IpDeviceReader(IpDeviceReader::PLATFORM_DEVICES_DIRECTORY);
+  std::vector<IpDevice> devices = dtr.devices;
+
+  // Match devices and ips
+  auto matcher = DeviceIpMatcher(devices, configuredIps);
+  std::vector<std::pair<std::shared_ptr<ip::Core>, IpDevice>> device_ip_pair = matcher.match();
+
+  // Bind to platform driver
+  for (auto pair : device_ip_pair) {
+    auto device = pair.second;
+    // If driver is attached unbind it
+    if (device.driver().has_value()) {
+      device.driver().value().unbind(device);
+    }
+
+    // Bind to platform driver
+    auto platform_driver = Driver(
+        std::filesystem::path("/sys/bus/platform/drivers/vfio-platform"));
+    platform_driver.bind(device);
+  }
+
+  // Prepare VFIO Group
+  const int IOMMU_GROUP =
+      2; //TODO: find Group, e.g. /sys/kernel/iommu_groups/3/devices/fd500000.dma
   auto group = std::make_shared<kernel::vfio::Group>(IOMMU_GROUP, true);
 
   // Attach container to group
   vfioContainer->attachGroup(group);
 
-  auto dtr = IpDeviceReader(IpDeviceReader::PLATFORM_DEVICES_DIRECTORY);
-  for (auto device : dtr.devices) {
-    for (auto ip : configuredIps) {
-      if (ip->getBaseaddr() == device.addr()) {
-        //DeviceManager.platformbind(device);
+  for (auto pair : device_ip_pair) {
+    auto device = pair.second;
 
-        // Open VFIO Device
-        auto vfio_device = std::make_shared<kernel::vfio::Device>(
-            device.name(), group->getFileDescriptor());
-        group->attachDevice(vfio_device);
-        this->vfio_devices.push_back(vfio_device);
+    // Open VFIO Device
+    auto vfio_device = std::make_shared<kernel::vfio::Device>(
+        device.name(), group->getFileDescriptor());
+    group->attachDevice(vfio_device);
+    this->vfio_devices.push_back(vfio_device);
 
-        // Map vfio device to process
-        const void *mapping = vfio_device->regionMap(0);
-        if (mapping == MAP_FAILED) {
-          logger->error("Failed to mmap() device");
-        }
-        logger->debug("memory mapped: {}", vfio_device->getName());
-
-        // Create mappings from process space to vfio devices
-        auto &mm = MemoryManager::get();
-        size_t srcVertexId = mm.getProcessAddressSpace();
-        const size_t mem_size = vfio_device->regionGetSize(0);
-        size_t targetVertexId =
-            mm.getOrCreateAddressSpace(vfio_device->getName());
-        mm.createMapping(reinterpret_cast<uintptr_t>(mapping), 0, mem_size,
-                         "process to vfio", srcVertexId, targetVertexId);
-        logger->debug("create edge from process to {}", vfio_device->getName());
-
-        // Connect vfio vertex to Reg vertex
-        connect(vfio_device->getName(), ip);
-      }
+    // Map vfio device to process
+    const void *mapping = vfio_device->regionMap(0);
+    if (mapping == MAP_FAILED) {
+      logger->error("Failed to mmap() device");
     }
+    logger->debug("memory mapped: {}", vfio_device->getName());
+
+    // Create mappings from process space to vfio devices
+    auto &mm = MemoryManager::get();
+    size_t srcVertexId = mm.getProcessAddressSpace();
+    const size_t mem_size = vfio_device->regionGetSize(0);
+    size_t targetVertexId = mm.getOrCreateAddressSpace(vfio_device->getName());
+    mm.createMapping(reinterpret_cast<uintptr_t>(mapping), 0, mem_size,
+                     "process to vfio", srcVertexId, targetVertexId);
+    logger->debug("create edge from process to {}", vfio_device->getName());
+
+    auto ip = pair.first;
+    // Connect vfio vertex to Reg vertex
+    connect(vfio_device->getName(), ip);
   }
 }
 
