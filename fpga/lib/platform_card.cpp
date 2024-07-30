@@ -47,15 +47,10 @@ void PlatformCard::connectVFIOtoIps(
 
   // Bind to platform driver
   for (auto pair : device_ip_pair) {
-    auto device = pair.second;
-    // If driver is attached unbind it
-    if (device.driver().has_value()) {
-      device.driver().value().unbind(device);
-    }
-
     // Bind to platform driver
     auto platform_driver = Driver(
         std::filesystem::path("/sys/bus/platform/drivers/vfio-platform"));
+    auto device = pair.second;
     platform_driver.bind(device);
   }
 
