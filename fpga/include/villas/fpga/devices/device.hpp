@@ -9,6 +9,7 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 #include <villas/fpga/devices/driver.hpp>
 
 class Device {
@@ -17,11 +18,15 @@ public:
 
 public:
   Device(const std::filesystem::path path) : path(path){};
-  Driver driver(){
-    //* /sys/bus/platform/devices/$device/driver -> $DRIVER:/../../../../bus/platform/drivers/xilinx-vdma
-    this->path
-    fs::read_symlink(this->path)
-
-    return Driver(this->path);
+  std::optional<Driver> driver() {
+    std::filesystem::path driver_symlink =
+        std::filesystem::path(this->path.u8string() + "/driver");
+    try {
+      std::filesystem::path driver_path =
+          std::filesystem::read_symlink(driver_symlink);
+      return Driver(driver_path);
+    } catch (std::filesystem::filesystem_error &e) {
+      return std::nullopt;
+    }
   };
 };
