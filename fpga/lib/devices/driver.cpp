@@ -14,6 +14,14 @@ void Driver::unbind(const Device &device) const {
 };
 
 void Driver::bind(const Device &device) const {
+  // If driver is attached unbind it
+  if (device.driver().has_value()) {
+    device.driver().value().unbind(device);
+  }
+  force_bind(device);
+}
+
+void Driver::force_bind(const Device &device) const {
   write_to_file("vfio-platform",
                 std::filesystem::path(
                     device.path.u8string() +

@@ -37,4 +37,5 @@ public:
 
   void unbind(const Device &device) const;
   void bind(const Device &device) const;
+  void force_bind(const Device &device) const;
 };
