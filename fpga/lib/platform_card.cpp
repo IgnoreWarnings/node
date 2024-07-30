@@ -101,7 +101,7 @@ void PlatformCard::connect(std::string device_name,
   size_t srcVertexId = mm.getOrCreateAddressSpace(device_name);
 
   std::string taget_address_space_name =
-      ip->getInstanceName() + "/Reg"; //? Reg neded?
+      ip->getInstanceName() + "/Reg"; //? TODO: Reg neded?
   size_t targetVertexId;
   targetVertexId = mm.getOrCreateAddressSpace(taget_address_space_name);
 
