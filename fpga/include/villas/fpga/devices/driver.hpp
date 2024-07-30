@@ -8,21 +8,33 @@
 
 #pragma once
 
+#include <fstream>
+#include <iostream>
+
 class Device;
 
 class Driver {
+private:
+  static constexpr char UNBIND_DEFAULT[] = "/unbind";
+  static constexpr char BIND_DEFAULT[] = "/bind";
+
 public:
   const std::filesystem::path path;
 
+private:
+  const std::filesystem::path unbind_path;
+  const std::filesystem::path bind_path;
+
 public:
-  Driver(const std::filesystem::path path) : path(path) {};
-  void unbind(const Device &device) const {
-    // Unbind device from driver
-    // echo $device > /sys/bus/platform/drivers/$DRIVER/unbind
-  };
-  void bind(const Device &device) const {
-    // Bind device to platform-vfio driver
-    // echo vfio-platform > /sys/bus/platform/devices/$device/driver_override;
-    // echo $device > /sys/bus/platform/drivers/vfio-platform/bind;
-  };
+  Driver(const std::filesystem::path path)
+      : Driver(path, std::filesystem::path(path.u8string() + UNBIND_DEFAULT),
+               std::filesystem::path(path.u8string() + BIND_DEFAULT)) {}
+
+  Driver(const std::filesystem::path path,
+         const std::filesystem::path unbind_path,
+         const std::filesystem::path bind_path)
+      : path(path), unbind_path(unbind_path), bind_path(bind_path){};
+
+  void unbind(const Device &device) const;
+  void bind(const Device &device) const;
 };

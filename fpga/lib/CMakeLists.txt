@@ -14,6 +14,9 @@ set(SOURCES
     utils.cpp
     dma.cpp
 
+    devices/driver.cpp
+    devices/ip_device.cpp
+
     ips/aurora_xilinx.cpp
     ips/aurora.cpp
     ips/bram.cpp
