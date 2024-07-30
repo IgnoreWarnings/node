@@ -19,6 +19,9 @@ public:
   Device(const std::filesystem::path path) : path(path){};
   Driver driver(){
     //* /sys/bus/platform/devices/$device/driver -> $DRIVER:/../../../../bus/platform/drivers/xilinx-vdma
-    return Driver(path);
+    this->path
+    fs::read_symlink(this->path)
+
+    return Driver(this->path);
   };
 };

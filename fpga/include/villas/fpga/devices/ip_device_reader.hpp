@@ -49,7 +49,7 @@ public:
           devices_directory + std::string("/") + devicetree_name);
       try {
         auto device = IpDevice::from(path_to_device);
-        devices.push_back(device);
+        this->devices.push_back(device);
       } catch (std::runtime_error& e){}
     }
   }
