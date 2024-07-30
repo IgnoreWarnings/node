@@ -21,12 +21,15 @@ public:
   std::optional<Driver> driver() {
     std::filesystem::path driver_symlink =
         std::filesystem::path(this->path.u8string() + "/driver");
+
+    std::filesystem::path driver_path;
     try {
-      std::filesystem::path driver_path =
-          std::filesystem::read_symlink(driver_symlink);
-      return Driver(driver_path);
+      driver_path = std::filesystem::read_symlink(driver_symlink);
     } catch (std::filesystem::filesystem_error &e) {
       return std::nullopt;
     }
+
+    driver_path = std::filesystem::absolute(driver_path);
+    return Driver(driver_path);
   };
 };
