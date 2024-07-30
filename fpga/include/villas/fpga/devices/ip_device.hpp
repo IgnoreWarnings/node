@@ -6,20 +6,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#pragma once
+
+#include <filesystem>
+#include <regex>
+#include <stdexcept>
+
+#include <villas/fpga/devices/device.hpp>
+
 class IpDevice : public Device {
 public:
   static IpDevice from(const std::filesystem::path unsafe_path) {
-    // Split the string at last slash
-    size_t pos = path.u8string().rfind('/');
-    std::string device_name = path.u8string().substr(pos + 1);
-
-    if (!std::regex_match(device_name, std::regex(R"([0-9A-Fa-f]+\..*)"))) {
+    if (!is_path_valid(unsafe_path))
       throw std::runtime_error(
-          "Name \"" + device_name +
-          "\" doesnt match format of \"[adress in hex].[name]\". ");
+          "Path \"" + unsafe_path.u8string() +
+          "\" failed validation as IpDevicePath \"[adress in hex].[name]\". ");
+    return IpDevice(unsafe_path);
+  }
+
+  static bool is_path_valid(const std::filesystem::path unsafe_path) {
+    // Split the string at last slash
+    size_t pos = unsafe_path.u8string().rfind('/');
+    std::string assumed_device_name = unsafe_path.u8string().substr(pos + 1);
+
+    // Match format of hexaddr.devicename
+    if (!std::regex_match(assumed_device_name,
+                          std::regex(R"([0-9A-Fa-f]+\..*)"))) {
+      return false;
     }
 
-    return IpDevice(path);
+    return true;
   }
 
 private:

@@ -9,9 +9,7 @@
 #pragma once
 
 #include <filesystem>
-#include <regex>
-#include <stdexcept>
-#include <string>
+#include <villas/fpga/devices/driver.hpp>
 
 class Device {
 public:

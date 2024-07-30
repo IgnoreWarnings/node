@@ -15,7 +15,7 @@
 
 #include <filesystem>
 
-#include <villas/fpga/devices/device.hpp>
+#include <villas/fpga/devices/ip_device.hpp>
 
 std::vector<std::string> read_names_in_directory(const std::string &name) {
   DIR *directory = opendir(name.c_str());
