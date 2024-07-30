@@ -22,9 +22,10 @@ void Driver::bind(const Device &device) const {
 }
 
 void Driver::force_bind(const Device &device) const {
-  write_to_file("vfio-platform",
-                std::filesystem::path(
-                    device.path.u8string() +
-                    "/driver_override")); // TODO: make this a seperate method
+  // TODO: Is this needed?
+  // write_to_file("vfio-platform",
+  //               std::filesystem::path(
+  //                   device.path.u8string() +
+  //                   "/driver_override")); // TODO: make this a seperate method
   write_to_file(device.name(), this->bind_path); 
 };
