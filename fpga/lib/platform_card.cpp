@@ -49,7 +49,7 @@ void PlatformCard::connectVFIOtoIps(
 
         // Open VFIO Device
         auto vfio_device = std::make_shared<kernel::vfio::Device>(
-            device.devicetree_name(), group->getFileDescriptor());
+            device.name(), group->getFileDescriptor());
         group->attachDevice(vfio_device);
         this->vfio_devices.push_back(vfio_device);
 
