@@ -6,15 +6,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <villas/fpga/devices/ip_device.hpp>
 #include <villas/fpga/devices/filewriter.hpp>
+#include <villas/fpga/devices/ip_device.hpp>
 
 void Driver::unbind(const Device &device) const {
   write_to_file(device.name(), this->unbind_path);
 };
 
 void Driver::bind(const Device &device) const {
-    // Bind device to platform-vfio driver
-    // echo vfio-platform > /sys/bus/platform/devices/$device/driver_override;
-    // echo $device > /sys/bus/platform/drivers/vfio-platform/bind;
+  write_to_file("vfio-platform",
+                std::filesystem::path(
+                    device.path.u8string() +
+                    "/driver_override")); // TODO: make this a seperate method
+  write_to_file(device.name(), this->bind_path); 
 };
