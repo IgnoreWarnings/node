@@ -15,7 +15,7 @@ void write_to_file(std::string data, const std::filesystem::path file) {
 
   if (outputFile.is_open()) {
     // Write to file
-    outputFile << file;
+    outputFile << data;
     outputFile.close();
   } else {
     throw std::filesystem::filesystem_error("Cannot open outputfile", std::error_code());
