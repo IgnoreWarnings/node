@@ -20,7 +20,6 @@ public:
   Device(const std::filesystem::path path) : path(path){};
 
   std::string name() const {
-    // Split the string at last slash
     size_t pos = path.u8string().rfind('/');
     return path.u8string().substr(pos + 1);
   }
