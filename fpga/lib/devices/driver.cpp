@@ -13,18 +13,21 @@ void Driver::unbind(const Device &device) const {
   write_to_file(device.name(), this->unbind_path);
 };
 
-void Driver::bind(const Device &device) const {
+void Driver::attach(const Device &device) const {
   // If driver is attached unbind it
   // if (device.driver().has_value()) {
   //   device.driver().value().unbind(device);
   // }
-  //override(device);
-  write_to_file(device.name(), this->bind_path);
+
+  override(device);
+
+  write_to_file(device.name(),
+                std::filesystem::path("/sys/bus/platform/drivers_probe"));
 }
 
 void Driver::override(const Device &device) const {
   write_to_file(this->name(), std::filesystem::path(device.path.u8string() +
-                                                  "/driver_override"));
+                                                    "/driver_override"));
 };
 
 std::string Driver::name() const {
