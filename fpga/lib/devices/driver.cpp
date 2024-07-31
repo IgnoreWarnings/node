@@ -15,17 +15,19 @@ void Driver::unbind(const Device &device) const {
 
 void Driver::bind(const Device &device) const {
   // If driver is attached unbind it
-  if (device.driver().has_value()) {
-    device.driver().value().unbind(device);
-  }
-  force_bind(device);
+  // if (device.driver().has_value()) {
+  //   device.driver().value().unbind(device);
+  // }
+  //override(device);
+  write_to_file(device.name(), this->bind_path);
 }
 
-void Driver::force_bind(const Device &device) const {
-  // TODO: change this
-  write_to_file("vfio-platform",
-                std::filesystem::path(
-                    device.path.u8string() +
-                    "/driver_override")); 
-  write_to_file(device.name(), this->bind_path); 
+void Driver::override(const Device &device) const {
+  write_to_file(this->name(), std::filesystem::path(device.path.u8string() +
+                                                  "/driver_override"));
 };
+
+std::string Driver::name() const {
+  size_t pos = path.u8string().rfind('/');
+  return path.u8string().substr(pos + 1);
+}
