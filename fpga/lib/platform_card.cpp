@@ -51,7 +51,7 @@ void PlatformCard::connectVFIOtoIps(
     auto platform_driver = Driver(
         std::filesystem::path("/sys/bus/platform/drivers/vfio-platform"));
     auto device = pair.second;
-    platform_driver.override(device);
+    platform_driver.attach(device);
   }
 
   // Prepare VFIO Group
