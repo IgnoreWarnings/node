@@ -42,8 +42,8 @@ void PlatformCard::connectVFIOtoIps(
   auto matcher = DeviceIpMatcher(devices, configuredIps);
   std::vector<std::pair<std::shared_ptr<ip::Core>, IpDevice>> device_ip_pair =
       matcher.match();
-  
-  // Bind to platform driver
+
+  // Bind device to platform driver
   for (auto pair : device_ip_pair) {
     auto device = pair.second;
     auto platform_driver = Driver(
@@ -51,20 +51,20 @@ void PlatformCard::connectVFIOtoIps(
     platform_driver.attach(device);
   }
 
-  // VFIO
+  // VFIO Setup
   for (auto pair : device_ip_pair) {
     auto device = pair.second;
 
-    // Prepare VFIO Group
+    // Attach group to container
     const int iommu_group = device.iommu_group();
+    auto vfio_group = vfioContainer->getOrAttachGroup(iommu_group);
     logger->debug("Device: {}, Iommu: {}", device.name(), iommu_group);
 
-    // Attach group to container
-    auto vfio_group = vfioContainer->getOrAttachGroup(iommu_group);
-
-    // Open VFIO Device
+    // Open Vfio Device
     auto vfio_device = std::make_shared<kernel::vfio::Device>(
         device.name(), vfio_group->getFileDescriptor());
+
+    // Attach device to group
     vfio_group->attachDevice(vfio_device);
 
     // Add as member
