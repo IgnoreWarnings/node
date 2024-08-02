@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <vector>
 #include <villas/fpga/card.hpp>
 
