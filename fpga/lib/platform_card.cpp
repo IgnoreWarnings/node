@@ -43,32 +43,34 @@ void PlatformCard::connectVFIOtoIps(
 
   // Match devices and ips
   auto matcher = DeviceIpMatcher(devices, configuredIps);
-  std::vector<std::pair<std::shared_ptr<ip::Core>, IpDevice>> device_ip_pair = matcher.match();
-
+  std::vector<std::pair<std::shared_ptr<ip::Core>, IpDevice>> device_ip_pair =
+      matcher.match();
+  
   // Bind to platform driver
   for (auto pair : device_ip_pair) {
-    // Bind to platform driver
     auto platform_driver = Driver(
         std::filesystem::path("/sys/bus/platform/drivers/vfio-platform"));
     auto device = pair.second;
     platform_driver.attach(device);
   }
 
-  // Prepare VFIO Group
-  const int IOMMU_GROUP =
-      2; //TODO: find Group, e.g. /sys/kernel/iommu_groups/3/devices/fd500000.dma
-  auto group = std::make_shared<kernel::vfio::Group>(IOMMU_GROUP, true);
-
-  // Attach container to group
-  vfioContainer->attachGroup(group);
-
+  // VFIO
   for (auto pair : device_ip_pair) {
     auto device = pair.second;
 
+    // Prepare VFIO Group
+    const int iommu_group = device.iommu_group();
+    logger->debug("Device: {}, Iommu: {}", device.name(), iommu_group);
+
+    // Attach group to container
+    auto vfio_group = vfioContainer->getOrAttachGroup(iommu_group);
+
     // Open VFIO Device
     auto vfio_device = std::make_shared<kernel::vfio::Device>(
-        device.name(), group->getFileDescriptor());
-    group->attachDevice(vfio_device);
+        device.name(), vfio_group->getFileDescriptor());
+    vfio_group->attachDevice(vfio_device);
+
+    // Add as member
     this->vfio_devices.push_back(vfio_device);
 
     // Map vfio device to process
