@@ -10,11 +10,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <cstddef>
-#include <filesystem>
 #include <jansson.h>
 #include <string>
-#include <utility>
 #include <villas/fpga/card_parser.hpp>
 #include <villas/fpga/core.hpp>
 #include <villas/fpga/devices/device_ip_matcher.hpp>
