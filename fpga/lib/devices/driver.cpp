@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <villas/fpga/devices/ip_device.hpp>
 #include <villas/fpga/devices/helpers/filewriter.hpp>
+#include <villas/fpga/devices/ip_device.hpp>
 
 std::string Driver::name() const {
   size_t pos = path.u8string().rfind('/');
@@ -28,12 +28,13 @@ void Driver::attach(const Device &device) const {
 }
 
 void Driver::override(const Device &device) const {
-  write_to_file(this->name(), std::filesystem::path(device.path.u8string() +
-                                                    "/driver_override"));
+  write_to_file(this->name(),
+                device.path / std::filesystem::path("driver_override"));
 };
 
 void Driver::probe(const Device &device) const {
-  write_to_file(device.name(),
-                std::filesystem::path("/sys/bus/platform/drivers_probe")); // Todo: find toplevel prove
+  write_to_file(
+      device.name(),
+      std::filesystem::path(
+          "/sys/bus/platform/drivers_probe")); // Todo: find toplevel prove
 }
-
