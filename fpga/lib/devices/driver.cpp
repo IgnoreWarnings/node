@@ -14,6 +14,10 @@ std::string Driver::name() const {
   return path.u8string().substr(pos + 1);
 }
 
+void Driver::bind(const Device &device) const {
+  write_to_file(device.name(), this->bind_path);
+};
+
 void Driver::unbind(const Device &device) const {
   write_to_file(device.name(), this->unbind_path);
 };
@@ -23,14 +27,15 @@ void Driver::attach(const Device &device) const {
     device.driver().value().unbind(device);
   }
 
-  override(device);
-  probe(device);
+  //override(device);
+  this->bind(device);
+  this->probe(device);
 }
 
-void Driver::override(const Device &device) const {
-  write_to_file(this->name(),
-                device.path / std::filesystem::path("driver_override"));
-};
+// void Driver::override(const Device &device) const {
+//   write_to_file(this->name(),
+//                 device.path / std::filesystem::path("driver_override"));
+// };
 
 void Driver::probe(const Device &device) const {
   write_to_file(
