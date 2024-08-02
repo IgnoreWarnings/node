@@ -9,6 +9,11 @@
 #include <villas/fpga/devices/ip_device.hpp>
 #include <villas/fpga/devices/helpers/filewriter.hpp>
 
+std::string Driver::name() const {
+  size_t pos = path.u8string().rfind('/');
+  return path.u8string().substr(pos + 1);
+}
+
 void Driver::unbind(const Device &device) const {
   write_to_file(device.name(), this->unbind_path);
 };
@@ -19,9 +24,7 @@ void Driver::attach(const Device &device) const {
   }
 
   override(device);
-
-  write_to_file(device.name(),
-                std::filesystem::path("/sys/bus/platform/drivers_probe"));
+  probe(device);
 }
 
 void Driver::override(const Device &device) const {
@@ -29,7 +32,8 @@ void Driver::override(const Device &device) const {
                                                     "/driver_override"));
 };
 
-std::string Driver::name() const {
-  size_t pos = path.u8string().rfind('/');
-  return path.u8string().substr(pos + 1);
+void Driver::probe(const Device &device) const {
+  write_to_file(device.name(),
+                std::filesystem::path("/sys/bus/platform/drivers_probe")); // Todo: find toplevel prove
 }
+

@@ -35,8 +35,9 @@ public:
          const std::filesystem::path bind_path)
       : path(path), unbind_path(unbind_path), bind_path(bind_path){};
 
+  std::string name() const;
   void attach(const Device &device) const;
   void unbind(const Device &device) const;
   void override(const Device &device) const;
-  std::string name() const;
+  void probe(const Device &device) const;
 };
