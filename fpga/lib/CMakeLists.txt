@@ -16,6 +16,7 @@ set(SOURCES
 
     devices/driver.cpp
     devices/ip_device.cpp
+    devices/helpers/filewriter.cpp
 
     ips/aurora_xilinx.cpp
     ips/aurora.cpp

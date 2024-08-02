@@ -11,13 +11,17 @@
 #include <filesystem>
 #include <optional>
 #include <villas/fpga/devices/driver.hpp>
+#include <villas/fpga/devices/helpers/filewriter.hpp>
 
 class Device {
 public:
   const std::filesystem::path path;
 
+private:
+  const std::filesystem::path probe_path;
+
 public:
-  Device(const std::filesystem::path path) : path(path){};
+  Device(const std::filesystem::path path){};
 
   std::string name() const {
     size_t pos = path.u8string().rfind('/');
@@ -34,7 +38,13 @@ public:
       return std::nullopt;
     }
 
-    std::filesystem::path driver_path = std::filesystem::canonical(driver_symlink);
+    std::filesystem::path driver_path =
+        std::filesystem::canonical(driver_symlink);
     return Driver(driver_path);
+  };
+
+  void driver_override(const Driver &driver) const {
+    write_to_file(driver.name(),
+                  this->path / std::filesystem::path("driver_override"));
   };
 };
