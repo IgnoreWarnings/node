@@ -39,6 +39,6 @@ public:
   void attach(const Device &device) const;
   void bind(const Device &device) const;
   void unbind(const Device &device) const;
-  //void override(const Device &device) const;
+  void override(const Device &device) const;
   void probe(const Device &device) const;
 };

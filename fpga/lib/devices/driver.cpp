@@ -27,15 +27,15 @@ void Driver::attach(const Device &device) const {
     device.driver().value().unbind(device);
   }
 
-  //override(device);
-  this->bind(device);
+  override(device);
+  //this->bind(device);
   this->probe(device);
 }
 
-// void Driver::override(const Device &device) const {
-//   write_to_file(this->name(),
-//                 device.path / std::filesystem::path("driver_override"));
-// };
+void Driver::override(const Device &device) const {
+  write_to_file(this->name(),
+                device.path / std::filesystem::path("driver_override"));
+};
 
 void Driver::probe(const Device &device) const {
   write_to_file(
