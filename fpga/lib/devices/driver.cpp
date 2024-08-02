@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <villas/fpga/devices/filewriter.hpp>
 #include <villas/fpga/devices/ip_device.hpp>
+#include <villas/fpga/devices/helpers/filewriter.hpp>
 
 void Driver::unbind(const Device &device) const {
   write_to_file(device.name(), this->unbind_path);
