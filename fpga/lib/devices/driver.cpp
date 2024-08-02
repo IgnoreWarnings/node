@@ -14,7 +14,6 @@ void Driver::unbind(const Device &device) const {
 };
 
 void Driver::attach(const Device &device) const {
-  // If driver is attached unbind it
   if (device.driver().has_value()) {
     device.driver().value().unbind(device);
   }
