@@ -12,12 +12,12 @@
 
 #pragma once
 
+#include <filesystem>
 #include <vector>
 #include <villas/fpga/card.hpp>
 
 namespace villas {
 namespace fpga {
-
 
 class PlatformCard : public Card {
 public:
@@ -27,7 +27,7 @@ public:
 
   std::vector<std::shared_ptr<kernel::vfio::Device>> vfio_devices;
 
-  void connectVFIOtoIps(std::list<std::shared_ptr<ip::Core>> configuredIps);
+  void connectVFIOtoIps(std::list<std::shared_ptr<ip::Core>> configuredIps) override;
   bool mapMemoryBlock(const std::shared_ptr<MemoryBlock> block) override;
 
 private:
