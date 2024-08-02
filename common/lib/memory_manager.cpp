@@ -114,7 +114,7 @@ MemoryTranslation MemoryManager::getTranslation(
     auto toAddrSpace = memoryGraph.getVertex(toAddrSpaceId);
     logger->debug("No translation found from ({}) to ({})",
                   fromAddrSpace->toString(), toAddrSpace->toString());
-
+    printGraph();
     throw std::out_of_range("no translation found");
   }
 
