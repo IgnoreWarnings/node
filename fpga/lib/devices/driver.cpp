@@ -41,5 +41,5 @@ void Driver::probe(const Device &device) const {
   write_to_file(
       device.name(),
       std::filesystem::path(
-          "/sys/bus/platform/drivers_probe")); // Todo: find toplevel prove
+          "/sys/bus/platform/drivers_probe")); // Todo: find probe path
 }
