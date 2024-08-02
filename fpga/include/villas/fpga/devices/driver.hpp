@@ -15,8 +15,8 @@ class Device;
 
 class Driver {
 private:
-  static constexpr char UNBIND_DEFAULT[] = "/unbind";
-  static constexpr char BIND_DEFAULT[] = "/bind";
+  static constexpr char UNBIND_DEFAULT[] = "unbind";
+  static constexpr char BIND_DEFAULT[] = "bind";
 
 public:
   const std::filesystem::path path;
@@ -27,8 +27,8 @@ private:
 
 public:
   Driver(const std::filesystem::path path)
-      : Driver(path, std::filesystem::path(path.u8string() + UNBIND_DEFAULT),
-               std::filesystem::path(path.u8string() + BIND_DEFAULT)) {}
+      : Driver(path, path / std::filesystem::path(UNBIND_DEFAULT),
+               path / std::filesystem::path(BIND_DEFAULT)) {}
 
   Driver(const std::filesystem::path path,
          const std::filesystem::path unbind_path,
