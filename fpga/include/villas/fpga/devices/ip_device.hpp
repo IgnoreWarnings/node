@@ -22,4 +22,5 @@ private:
 public:
   std::string ip_name() const;
   size_t addr() const;
+  int iommu_group() const;
 };

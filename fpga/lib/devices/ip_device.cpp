@@ -22,7 +22,7 @@ IpDevice IpDevice::from(const std::filesystem::path unsafe_path) {
 
 bool IpDevice::is_path_valid(const std::filesystem::path unsafe_path) {
   // Split the string at last slash
-  size_t pos = unsafe_path.u8string().rfind('/');
+  int pos = unsafe_path.u8string().rfind('/');
   std::string assumed_device_name = unsafe_path.u8string().substr(pos + 1);
 
   // Match format of hexaddr.devicename
@@ -35,7 +35,7 @@ bool IpDevice::is_path_valid(const std::filesystem::path unsafe_path) {
 }
 
 std::string IpDevice::ip_name() const {
-  size_t pos = name().find('.');
+  int pos = name().find('.');
   return name().substr(pos + 1);
 }
 
@@ -50,4 +50,17 @@ size_t IpDevice::addr() const {
   ss >> addr;
 
   return addr;
+}
+
+int IpDevice::iommu_group() const {
+  std::filesystem::path symlink =
+      std::filesystem::path(this->path.u8string() + "/iommu_group");
+
+  std::filesystem::path link;
+  link = std::filesystem::read_symlink(symlink);
+
+  std::string delimiter = "iommu_groups/";
+  int pos = link.u8string().find(delimiter);
+  int iommu_group = std::stoi(link.u8string().substr(pos + delimiter.length()));
+  return iommu_group;
 }
