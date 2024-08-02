@@ -20,17 +20,13 @@
 
 class IpDeviceReader {
 public:
-  static constexpr char PLATFORM_DEVICES_DIRECTORY[] =
-      "/sys/bus/platform/devices";
-
   const std::vector<std::string> devicetree_names;
   std::vector<IpDevice> devices;
 
-  IpDeviceReader(const char *devices_directory)
+  IpDeviceReader(std::filesystem::path devices_directory)
       : devicetree_names(read_names_in_directory(devices_directory)) {
     for (auto devicetree_name : this->devicetree_names) {
-      auto path_to_device = std::filesystem::path(
-          devices_directory + std::string("/") + devicetree_name);
+      auto path_to_device = devices_directory / std::filesystem::path(devicetree_name);
       try {
         auto device = IpDevice::from(path_to_device);
         this->devices.push_back(device);
