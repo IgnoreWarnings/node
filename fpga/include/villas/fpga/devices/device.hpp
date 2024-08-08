@@ -15,7 +15,7 @@
 
 class Device {
 private:
-  static constexpr char PROBE_DEFAULT[] = "../../drivers_probe";
+  static constexpr char PROBE_DEFAULT[] = "/sys/bus/platform/drivers_probe";
 
 public:
   const std::filesystem::path path;
@@ -25,7 +25,7 @@ private:
 
 public:
   Device(const std::filesystem::path path)
-      : Device(path, path / std::filesystem::path(PROBE_DEFAULT)){};
+      : Device(path, std::filesystem::path(PROBE_DEFAULT)){};
   Device(const std::filesystem::path path,
          const std::filesystem::path probe_path)
       : path(path), probe_path(probe_path){};
