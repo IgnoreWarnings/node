@@ -16,7 +16,7 @@
 
 class JsonParser {
 private:
-  inline static auto logger = villas::logging.get("Json Parser");
+  inline static auto logger = villas::Log::get("Json Parser");
 
 public:
   json_t* json;

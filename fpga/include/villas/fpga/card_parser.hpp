@@ -17,7 +17,7 @@ public:
   int affinity = 0;
   int polling = 0;
 
-  CardParser(json_t *json_card) : logger(villas::logging.get("CardParser")) {
+  CardParser(json_t *json_card) : logger(villas::Log::get("CardParser")) {
     json_error_t err;
     int ret = json_unpack_ex(
         json_card, &err, 0, "{ s: o, s?: i, s?: b, s?: s, s?: s, s?: b, s?: o}",
