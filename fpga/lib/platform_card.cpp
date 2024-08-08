@@ -50,11 +50,7 @@ void PlatformCard::connectVFIOtoIps(
       Driver(std::filesystem::path("/sys/bus/platform/drivers/vfio-platform"));
   for (auto pair : device_ip_pair) {
     auto device = pair.second;
-    if (device.driver().has_value()) {
-      device.driver().value().unbind(device);
-    }
-    device.driver_override(driver);
-    device.probe();
+    driver.attach(device);
   }
 
   // VFIO Setup
