@@ -12,7 +12,7 @@
 #include <villas/log.hpp>
 
 void write_to_file(std::string data, const std::filesystem::path file) {
-  villas::logging.get("FW")->warn("{} > {}", data, file.u8string());
+  villas::logging.get("Filewriter")->debug("{} > {}", data, file.u8string());
   std::ofstream outputFile(file.u8string());
 
   if (outputFile.is_open()) {
