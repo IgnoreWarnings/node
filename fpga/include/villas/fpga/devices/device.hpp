@@ -21,7 +21,7 @@ private:
   const std::filesystem::path probe_path;
 
 public:
-  Device(const std::filesystem::path path){};
+  Device(const std::filesystem::path path): path(path){};
 
   std::string name() const {
     size_t pos = path.u8string().rfind('/');
