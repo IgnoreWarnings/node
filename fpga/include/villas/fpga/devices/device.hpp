@@ -14,6 +14,9 @@
 #include <villas/fpga/devices/helpers/filewriter.hpp>
 
 class Device {
+private:
+  static constexpr char PROBE_DEFAULT[] = "../../drivers_probe";
+
 public:
   const std::filesystem::path path;
 
@@ -21,7 +24,11 @@ private:
   const std::filesystem::path probe_path;
 
 public:
-  Device(const std::filesystem::path path): path(path){};
+  Device(const std::filesystem::path path)
+      : Device(path, path / std::filesystem::path(PROBE_DEFAULT)){};
+  Device(const std::filesystem::path path,
+         const std::filesystem::path probe_path)
+      : path(path), probe_path(probe_path){};
 
   std::string name() const {
     size_t pos = path.u8string().rfind('/');
@@ -47,4 +54,6 @@ public:
     write_to_file(driver.name(),
                   this->path / std::filesystem::path("driver_override"));
   };
+
+  void probe() const { write_to_file(this->name(), this->probe_path); };
 };

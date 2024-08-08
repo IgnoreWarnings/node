@@ -17,7 +17,6 @@ class Driver {
 private:
   static constexpr char BIND_DEFAULT[] = "bind";
   static constexpr char UNBIND_DEFAULT[] = "unbind";
-  static constexpr char PROBE_DEFAULT[] = "../../drivers_probe";
 
 public:
   const std::filesystem::path path;
@@ -30,18 +29,14 @@ private:
 public:
   Driver(const std::filesystem::path path)
       : Driver(path, path / std::filesystem::path(BIND_DEFAULT),
-               path / std::filesystem::path(UNBIND_DEFAULT),
-               path / std::filesystem::path(PROBE_DEFAULT)){};
+               path / std::filesystem::path(UNBIND_DEFAULT)){};
 
   Driver(const std::filesystem::path path,
          const std::filesystem::path bind_path,
-         const std::filesystem::path unbind_path,
-         const std::filesystem::path probe_path)
-      : path(path), bind_path(bind_path), unbind_path(unbind_path),
-        probe_path(probe_path){};
+         const std::filesystem::path unbind_path)
+      : path(path), bind_path(bind_path), unbind_path(unbind_path){};
 
   std::string name() const;
   void bind(const Device &device) const;
   void unbind(const Device &device) const;
-  void probe(const Device &device) const;
 };

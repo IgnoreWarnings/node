@@ -22,6 +22,3 @@ void Driver::unbind(const Device &device) const {
   write_to_file(device.name(), this->unbind_path);
 };
 
-void Driver::probe(const Device &device) const {
-  write_to_file(device.name(), this->probe_path);
-};

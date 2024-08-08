@@ -54,7 +54,7 @@ void PlatformCard::connectVFIOtoIps(
       device.driver().value().unbind(device);
     }
     device.driver_override(driver);
-    driver.probe(device);
+    device.probe();
   }
 
   // VFIO Setup
