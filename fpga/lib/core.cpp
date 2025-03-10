@@ -188,6 +188,7 @@ CoreFactory::configureIps(std::list<IpIdentifier> orderedIps, json_t *json_ips,
 
             //! Assuming there is one parsed ip as intc, which can be reused from the heap
             intc = dynamic_cast<InterruptController *>(configuredIp.get());
+
             break;
           }
         }
@@ -214,7 +215,7 @@ CoreFactory::configureIps(std::list<IpIdentifier> orderedIps, json_t *json_ips,
           continue;
         }
         logger->debug("IRQ: {} -> {}:{}", irqName, irqControllerName, num);
-        ip->irqs[irqName] = {num, intc, ""};
+        ip->irqs[irqName] = {0, intc, ""};
       }
     }
 

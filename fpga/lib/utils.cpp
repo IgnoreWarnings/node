@@ -49,6 +49,7 @@ fpga::getAuroraChannels(std::shared_ptr<fpga::Card> card) {
 
     aurora_channels->push_back(aurora);
   }
+
   return aurora_channels;
 }
 
@@ -247,6 +248,7 @@ fpga::createCard(json_t *config, const std::filesystem::path &searchPath,
     throw ConfigError(config, err, "interface",
                       "Failed to parse interface name for card {}", card_name);
   }
+
   std::string interfaceNameStr(interfaceName);
   std::shared_ptr<fpga::Card> card = nullptr;
   if (interfaceNameStr == "pcie") {
